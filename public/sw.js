@@ -1,9 +1,4 @@
-/**
- * PubScreen Service Worker (Offline Resilience & Media Cache)
- * Enables autonomous digital signage playback without active internet.
- */
-
-const CACHE_VERSION = 'pubscreen-v8';
+const CACHE_VERSION = 'pubscreen-v9';
 const STATIC_CACHE_NAME = `static-${CACHE_VERSION}`;
 const MEDIA_CACHE_NAME = `media-${CACHE_VERSION}`;
 
@@ -13,11 +8,12 @@ const CORE_STATIC_ASSETS = [
   './index.html',
   './links.html',
   './style.css?v=7',
-  './app.js',
+  './app.js?v=9',
   './media-list.json',
   '../logos/passi-logo.png?v=2',
   '../logos/lagora-logo.png?v=2',
-  '../logos/qr-code.png?v=3'
+  '../logos/qr-code.png?v=3',
+  '../sponsors/sponsor1.png'
 ];
 
 // =========================================================================
@@ -28,7 +24,6 @@ self.addEventListener('install', (event) => {
 
   event.waitUntil(
     caches.open(STATIC_CACHE_NAME).then(async (cache) => {
-      // Pre-cache core assets gracefully (fail-safe if an optional logo is missing initially)
       for (const asset of CORE_STATIC_ASSETS) {
         try {
           await cache.add(asset);
@@ -93,7 +88,13 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Cache-first with network fallback & dynamic cache for sponsors and static assets
+  // Network-first for sponsors (so official sponsor images update immediately without stale cache)
+  if (url.pathname.includes('/sponsors/')) {
+    event.respondWith(networkFirstStrategy(request, MEDIA_CACHE_NAME));
+    return;
+  }
+
+  // Cache-first with network fallback & dynamic cache for static assets
   event.respondWith(staleWhileRevalidateOrCacheFirst(request));
 });
 

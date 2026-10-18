@@ -271,7 +271,7 @@
     if (!sponsorList[index] || !sponsorImg) return;
 
     const sponsorFilename = sponsorList[index];
-    const targetSrc = `${SPONSOR_BASE_PATH}${encodeURIComponent(sponsorFilename)}`;
+    const targetSrc = `${SPONSOR_BASE_PATH}${encodeURIComponent(sponsorFilename)}?_v=real`;
 
     // Fade out current logo
     sponsorImg.classList.remove('fade-in');
