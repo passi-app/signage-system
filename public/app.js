@@ -100,8 +100,8 @@
     } else if (!isMediaListLoaded) {
       console.warn('[PubScreen] media-list.json unavailable, loading default fallback demo items.');
       handleMediaListUpdate({
-        videos: ['sample-ad1.mp4', 'sample-ad2.mp4'],
-        sponsors: ['sponsor1.png', 'sponsor2.png', 'sponsor3.png']
+        videos: ['promo_passi.mp4', 'lagora_ambiance.mp4'],
+        sponsors: ['sponsor1.png']
       });
     }
   }

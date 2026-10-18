@@ -3,7 +3,7 @@
  * Enables autonomous digital signage playback without active internet.
  */
 
-const CACHE_VERSION = 'pubscreen-v7';
+const CACHE_VERSION = 'pubscreen-v8';
 const STATIC_CACHE_NAME = `static-${CACHE_VERSION}`;
 const MEDIA_CACHE_NAME = `media-${CACHE_VERSION}`;
 
