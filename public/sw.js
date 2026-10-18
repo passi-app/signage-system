@@ -3,7 +3,7 @@
  * Enables autonomous digital signage playback without active internet.
  */
 
-const CACHE_VERSION = 'pubscreen-v2';
+const CACHE_VERSION = 'pubscreen-v3';
 const STATIC_CACHE_NAME = `static-${CACHE_VERSION}`;
 const MEDIA_CACHE_NAME = `media-${CACHE_VERSION}`;
 
@@ -12,7 +12,7 @@ const CORE_STATIC_ASSETS = [
   './',
   './index.html',
   './links.html',
-  './style.css',
+  './style.css?v=3',
   './app.js',
   './media-list.json',
   '../logos/passi-logo.png?v=2',
