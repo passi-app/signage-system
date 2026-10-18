@@ -3,7 +3,7 @@
  * Enables autonomous digital signage playback without active internet.
  */
 
-const CACHE_VERSION = 'pubscreen-v1';
+const CACHE_VERSION = 'pubscreen-v2';
 const STATIC_CACHE_NAME = `static-${CACHE_VERSION}`;
 const MEDIA_CACHE_NAME = `media-${CACHE_VERSION}`;
 
@@ -15,8 +15,8 @@ const CORE_STATIC_ASSETS = [
   './style.css',
   './app.js',
   './media-list.json',
-  '../logos/passi-logo.png',
-  '../logos/lagora-logo.png',
+  '../logos/passi-logo.png?v=2',
+  '../logos/lagora-logo.png?v=2',
   '../logos/qr-code.png'
 ];
 

@@ -1,9 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 540 150" width="540" height="150">
-  <circle cx="60" cy="71" r="34" fill="none" stroke="#0f172a" stroke-width="6" stroke-dasharray="106 106" stroke-dashoffset="0"/>
-  <rect x="34" y="75" width="8" height="32" rx="2" fill="#2563eb" />
-  <rect x="54" y="75" width="8" height="32" rx="2" fill="#0f172a" />
-  <rect x="74" y="75" width="8" height="32" rx="2" fill="#2563eb" />
-  <rect x="26" y="105" width="64" height="6" rx="2" fill="#0f172a" />
-  <text x="120" y="80" font-family="Plus Jakarta Sans, Segoe UI, sans-serif" font-size="48" font-weight="800" fill="#0f172a" letter-spacing="2">L'AGORA</text>
-  <text x="122" y="112" font-family="Plus Jakarta Sans, Segoe UI, sans-serif" font-size="14" font-weight="600" fill="#64748b" letter-spacing="4">MALL &amp; LIFESTYLE</text>
-</svg>
