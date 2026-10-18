@@ -166,21 +166,11 @@ body.show-cursor {
   display: block;
 }
 
-/* L'agora Logo (Top Right): Circular dark gradient badge matching the official brand asset */
+/* L'agora Logo (Top Right): Identical capsule shape & size as Passi, with dark gradient background */
 .logo-wrapper.logo-right {
-  width: 76px;
-  height: 76px;
-  padding: 0;
-  border-radius: 50%;
   background: linear-gradient(90deg, #020202 0%, #707070 100%);
   border: 1.5px solid rgba(255, 255, 255, 0.15);
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
-}
-
-.logo-wrapper.logo-right .permanent-logo {
-  height: 38px;
-  width: 38px;
-  max-width: none;
 }
 
 /* Center Clock Widget */
