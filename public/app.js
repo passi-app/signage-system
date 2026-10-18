@@ -42,6 +42,16 @@
   async function init() {
     console.log('[PubScreen] Booting digital signage player...');
 
+    // Prep video elements for silent kiosk autoplay
+    [videoA, videoB].forEach((vid) => {
+      if (!vid) return;
+      vid.muted = true;
+      vid.defaultMuted = true;
+      vid.playsInline = true;
+      vid.setAttribute('muted', '');
+      vid.setAttribute('playsinline', '');
+    });
+
     // Start live clock
     initClock();
 
@@ -158,55 +168,84 @@
     // Reset handlers
     nextVideoEl.onended = null;
     nextVideoEl.onerror = null;
+    nextVideoEl.oncanplay = null;
+    nextVideoEl.onloadeddata = null;
+
+    // Guarantee muted state for browser autoplay policy
+    nextVideoEl.muted = true;
+    nextVideoEl.defaultMuted = true;
+    nextVideoEl.playsInline = true;
+
+    let hasStarted = false;
+
+    const startPlayback = () => {
+      if (hasStarted) return;
+      hasStarted = true;
+
+      // Bring next video forward, fade out previous
+      nextVideoEl.classList.add('is-active');
+
+      const playPromise = nextVideoEl.play();
+      if (playPromise !== undefined) {
+        playPromise
+          .then(() => {
+            console.log(`[PubScreen] Video playback started: ${videoFilename}`);
+            setTimeout(() => {
+              if (currentVideoEl !== nextVideoEl) {
+                currentVideoEl.pause();
+                currentVideoEl.classList.remove('is-active');
+              }
+            }, 800);
+
+            // Swap active / inactive references
+            activeVideoEl = nextVideoEl;
+            inactiveVideoEl = currentVideoEl;
+
+            // Attach ended listener to advance to next
+            activeVideoEl.onended = () => {
+              console.log('[PubScreen] Video finished naturally.');
+              advanceVideo();
+            };
+
+            // 30-minute maximum duration watchdog
+            maxDurationTimer = setTimeout(() => {
+              console.warn('[PubScreen] 30 minutes elapsed on single video. Forcing advance.');
+              advanceVideo();
+            }, MAX_VIDEO_DURATION_MS);
+          })
+          .catch((playErr) => {
+            console.warn('[PubScreen] Autoplay failed or requires interaction:', playErr);
+            activeVideoEl = nextVideoEl;
+            inactiveVideoEl = currentVideoEl;
+
+            const resumeOnInteraction = () => {
+              nextVideoEl.play().catch(console.warn);
+              window.removeEventListener('click', resumeOnInteraction);
+              window.removeEventListener('touchstart', resumeOnInteraction);
+              window.removeEventListener('keydown', resumeOnInteraction);
+            };
+            window.addEventListener('click', resumeOnInteraction);
+            window.addEventListener('touchstart', resumeOnInteraction);
+            window.addEventListener('keydown', resumeOnInteraction);
+          });
+      }
+    };
 
     nextVideoEl.src = videoSrc;
     nextVideoEl.load();
 
-    const startPlayback = () => {
-      nextVideoEl.play()
-        .then(() => {
-          // Crossfade: bring next video forward, fade out previous
-          nextVideoEl.classList.add('is-active');
-          currentVideoEl.classList.remove('is-active');
-
-          setTimeout(() => {
-            currentVideoEl.pause();
-          }, 800);
-
-          // Swap active / inactive references
-          activeVideoEl = nextVideoEl;
-          inactiveVideoEl = currentVideoEl;
-
-          // Attach ended listener to advance to next
-          activeVideoEl.onended = () => {
-            console.log('[PubScreen] Video finished naturally.');
-            advanceVideo();
-          };
-
-          // 30-minute maximum duration watchdog
-          maxDurationTimer = setTimeout(() => {
-            console.warn('[PubScreen] 30 minutes elapsed on single video. Forcing advance.');
-            advanceVideo();
-          }, MAX_VIDEO_DURATION_MS);
-        })
-        .catch((playErr) => {
-          console.warn('[PubScreen] Autoplay failed or blocked:', playErr);
-          // Retry or advance
-          setTimeout(advanceVideo, 2000);
-        });
-    };
-
-    // When media is ready to render
-    nextVideoEl.oncanplay = function () {
-      nextVideoEl.oncanplay = null;
+    // Check if media is already loaded in cache
+    if (nextVideoEl.readyState >= 2) {
       startPlayback();
-    };
+    } else {
+      nextVideoEl.oncanplay = startPlayback;
+      nextVideoEl.onloadeddata = startPlayback;
+    }
 
     // Error handling (e.g. 404, unsupported codec)
     nextVideoEl.onerror = function (e) {
       console.error(`[PubScreen] Error loading video "${videoFilename}":`, e);
-      // Advance to next video after short delay so we never get stuck
-      setTimeout(advanceVideo, 2000);
+      setTimeout(advanceVideo, 3000);
     };
   }
 
