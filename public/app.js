@@ -30,9 +30,7 @@
   let inactiveVideoEl = videoB;
 
   // DOM Elements
-  const sponsorImg = document.getElementById('sponsor-logo-img');
-  const sponsorEmptyState = document.getElementById('sponsor-empty-state');
-  const sponsorProgressBar = document.getElementById('sponsor-progress-fill');
+  const sponsorMarqueeTrack = document.getElementById('sponsor-marquee-track');
   const clockTimeEl = document.getElementById('live-clock');
   const clockDateEl = document.getElementById('live-date');
   const networkToast = document.getElementById('network-status');
@@ -229,86 +227,38 @@
   });
 
   // =========================================================================
-  // 4. SPONSOR ROTATION ENGINE (10-second crossfade cycle)
+  // 4. SPONSOR MARQUEE ENGINE (Continuous Full-Width Ribbon)
   // =========================================================================
   function startSponsorRotation() {
-    if (sponsorCycleInterval) {
-      clearInterval(sponsorCycleInterval);
-      sponsorCycleInterval = null;
-    }
+    renderSponsorsMarquee(sponsorList);
+  }
 
-    if (!sponsorList || sponsorList.length === 0) {
-      if (sponsorImg) sponsorImg.style.display = 'none';
-      if (sponsorEmptyState) sponsorEmptyState.style.display = 'block';
-      if (sponsorProgressBar) sponsorProgressBar.style.width = '0%';
+  function renderSponsorsMarquee(sponsors) {
+    if (!sponsorMarqueeTrack) return;
+
+    if (!sponsors || sponsors.length === 0) {
+      sponsorMarqueeTrack.innerHTML = '';
       return;
     }
 
-    if (sponsorEmptyState) sponsorEmptyState.style.display = 'none';
-    if (sponsorImg) sponsorImg.style.display = 'block';
-
-    // Show initial sponsor
-    showSponsor(currentSponsorIndex);
-
-    // If only one sponsor, display continuously without fading
-    if (sponsorList.length === 1) {
-      if (sponsorProgressBar) sponsorProgressBar.style.width = '100%';
-      return;
+    // Build a repeating list of at least 8 items so the track covers the full bar width
+    let items = [...sponsors];
+    while (items.length < 8) {
+      items = items.concat(sponsors);
     }
 
-    // Animate progress bar across 10 seconds
-    animateSponsorProgressBar();
+    // Duplicate list twice for seamless 0% to -50% infinite CSS marquee loop
+    const fullList = [...items, ...items];
 
-    // Cycle every 10 seconds
-    sponsorCycleInterval = setInterval(() => {
-      currentSponsorIndex = (currentSponsorIndex + 1) % sponsorList.length;
-      showSponsor(currentSponsorIndex);
-      animateSponsorProgressBar();
-    }, SPONSOR_CYCLE_MS);
-  }
-
-  function showSponsor(index) {
-    if (!sponsorList[index] || !sponsorImg) return;
-
-    const sponsorFilename = sponsorList[index];
-    const targetSrc = `${SPONSOR_BASE_PATH}${encodeURIComponent(sponsorFilename)}?_v=real`;
-
-    // Fade out current logo
-    sponsorImg.classList.remove('fade-in');
-    sponsorImg.classList.add('fade-out');
-
-    setTimeout(() => {
-      sponsorImg.src = targetSrc;
-      sponsorImg.alt = `Sponsor: ${sponsorFilename}`;
-
-      sponsorImg.onload = () => {
-        sponsorImg.classList.remove('fade-out');
-        sponsorImg.classList.add('fade-in');
-      };
-
-      sponsorImg.onerror = () => {
-        console.warn(`[PubScreen] Failed to load sponsor logo: ${targetSrc}`);
-        sponsorImg.classList.remove('fade-out');
-        sponsorImg.classList.add('fade-in');
-      };
-    }, 400);
-  }
-
-  function animateSponsorProgressBar() {
-    if (!sponsorProgressBar) return;
-    if (sponsorProgressAnimation) cancelAnimationFrame(sponsorProgressAnimation);
-
-    const startTime = performance.now();
-    function step(now) {
-      const elapsed = now - startTime;
-      const progress = Math.min(elapsed / SPONSOR_CYCLE_MS, 1);
-      sponsorProgressBar.style.width = `${progress * 100}%`;
-
-      if (progress < 1) {
-        sponsorProgressAnimation = requestAnimationFrame(step);
-      }
-    }
-    sponsorProgressAnimation = requestAnimationFrame(step);
+    sponsorMarqueeTrack.innerHTML = fullList.map((filename, idx) => `
+      <div class="sponsor-card" data-idx="${idx}">
+        <img
+          src="${SPONSOR_BASE_PATH}${encodeURIComponent(filename)}?_v=real"
+          alt="Sponsor ${filename}"
+          class="sponsor-card-img"
+          loading="eager">
+      </div>
+    `).join('');
   }
 
   // =========================================================================

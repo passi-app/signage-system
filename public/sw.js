@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'pubscreen-v11';
+const CACHE_VERSION = 'pubscreen-v12';
 const STATIC_CACHE_NAME = `static-${CACHE_VERSION}`;
 const MEDIA_CACHE_NAME = `media-${CACHE_VERSION}`;
 
@@ -7,8 +7,8 @@ const CORE_STATIC_ASSETS = [
   './',
   './index.html',
   './links.html',
-  './style.css?v=8',
-  './app.js?v=9',
+  './style.css?v=9',
+  './app.js?v=10',
   './media-list.json',
   '../logos/passi-logo.png?v=5',
   '../logos/lagora-logo.png?v=2',

@@ -12,7 +12,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
-  <link rel="stylesheet" href="style.css?v=8">
+  <link rel="stylesheet" href="style.css?v=9">
 </head>
 <body class="signage-body">
 
@@ -76,44 +76,28 @@
   </header>
 
   <!-- ========================================================
-       3. SPONSOR BAR (Fixed bottom bar, transparent white)
+       3. SPONSOR BAR (Fixed bottom bar, full-width marquee)
        ======================================================== -->
   <footer class="sponsor-bar" role="contentinfo" id="sponsor-bar">
-    <div class="sponsor-bar-inner">
-
-      <!-- Left Flank: Symmetrical spacer -->
-      <div class="sponsor-flank sponsor-flank-left" aria-hidden="true"></div>
-
-      <!-- Center: Prominent QR Code to links.html (No text, no laser) -->
-      <div class="qr-center-container">
-        <a href="links.html" class="qr-card" title="Scannez pour accéder aux liens">
-          <div class="qr-frame">
-            <img
-              src="../logos/qr-code.png?v=3"
-              alt="QR Code"
-              class="qr-image"
-              id="qr-image"
-              loading="eager">
-          </div>
-        </a>
+    <!-- Continuous Full-Width Sponsor Marquee Track across entire bar -->
+    <div class="sponsor-marquee-container" id="sponsor-marquee-container">
+      <div class="sponsor-marquee-track" id="sponsor-marquee-track">
+        <!-- Dynamically populated by app.js -->
       </div>
+    </div>
 
-      <!-- Right Flank: Dynamic Sponsor Display Area -->
-      <div class="sponsor-flank sponsor-flank-right" id="sponsor-display-area">
-        <div class="sponsor-display-box" id="sponsor-stage">
+    <!-- Center: Prominent QR Code to links.html (Stationary & 100% scannable) -->
+    <div class="qr-center-container">
+      <a href="links.html" class="qr-card" title="Scannez pour accéder aux liens">
+        <div class="qr-frame">
           <img
-            id="sponsor-logo-img"
-            src=""
-            alt="Sponsor en vedette"
-            class="sponsor-logo-img"
-            style="opacity: 0;">
-          <div class="sponsor-empty-state" id="sponsor-empty-state" style="display: none;"></div>
+            src="../logos/qr-code.png?v=3"
+            alt="QR Code"
+            class="qr-image"
+            id="qr-image"
+            loading="eager">
         </div>
-        <div class="sponsor-progress-bar">
-          <div class="sponsor-progress-fill" id="sponsor-progress-fill"></div>
-        </div>
-      </div>
-
+      </a>
     </div>
   </footer>
 
@@ -126,6 +110,6 @@
   </div>
 
   <!-- Scripts -->
-  <script src="app.js?v=9"></script>
+  <script src="app.js?v=10"></script>
 </body>
 </html>
