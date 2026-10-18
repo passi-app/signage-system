@@ -258,7 +258,7 @@ body.show-cursor {
 .sponsor-marquee-track {
   display: flex;
   align-items: center;
-  gap: 40px;
+  gap: 64px;
   width: max-content;
   animation: sponsorMarqueeScroll 32s linear infinite;
   will-change: transform;
@@ -274,30 +274,27 @@ body.show-cursor {
   }
 }
 
-/* Individual sponsor cards in the continuous ribbon */
+/* Individual sponsor logos in the continuous ribbon (No white band, pure logo) */
 .sponsor-card {
   flex-shrink: 0;
-  height: 74px;
-  min-width: 180px;
-  max-width: 250px;
-  background: rgba(255, 255, 255, 0.92);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border-radius: 18px;
-  border: 1px solid rgba(255, 255, 255, 0.95);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.14);
+  height: 96px;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 8px 24px;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  padding: 0 8px;
   transition: transform 0.3s ease;
 }
 
 .sponsor-card-img {
-  max-width: 100%;
-  max-height: 56px;
+  height: 94px;
+  width: auto;
+  max-width: 240px;
   object-fit: contain;
   display: block;
+  filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.45)) drop-shadow(0 4px 14px rgba(0, 0, 0, 0.4));
 }
 
 /* Center QR Code Container (Stationary on top of ribbon) */
