@@ -49,8 +49,8 @@
 │   └── workflows/
 │       └── update-media.yml   # The "Hidden Algorithm" - scans media & auto-commits media-list.json
 ├── videos/                    # Drop your .mp4 files here (plays full-screen, looped, 30m limit)
-│   ├── promo_passi.mp4
-│   └── lagora_ambiance.mp4
+│   ├── vid1.mp4
+│   └── vid2.mp4
 ├── sponsors/                  # Drop sponsor logo images here (.png, .jpg, .svg, .webp)
 │   ├── sponsor_apple.png
 │   ├── sponsor_nespresso.png

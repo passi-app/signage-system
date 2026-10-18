@@ -1,7 +1,7 @@
 {
   "videos": [
-    "promo_passi.mp4",
-    "lagora_ambiance.mp4"
+    "vid1.mp4",
+    "vid2.mp4"
   ],
   "sponsors": [
     "sponsor2.png",
@@ -9,5 +9,5 @@
   ],
   "totalVideos": 2,
   "totalSponsors": 2,
-  "updatedAt": "2026-10-18T18:13:40.018Z"
+  "updatedAt": "2026-10-18T18:32:00.000Z"
 }
