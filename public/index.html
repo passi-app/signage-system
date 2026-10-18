@@ -12,7 +12,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
-  <link rel="stylesheet" href="style.css?v=3">
+  <link rel="stylesheet" href="style.css?v=5">
 </head>
 <body class="signage-body">
 
@@ -90,22 +90,16 @@
         <p class="sponsor-subtitle">Au cœur de votre expérience shopping</p>
       </div>
 
-      <!-- Center: Prominent QR Code to links.html -->
+      <!-- Center: Prominent QR Code to links.html (No text, no laser) -->
       <div class="qr-center-container">
-        <a href="links.html" class="qr-card" title="Scannez pour accéder aux liens exclusifs">
+        <a href="links.html" class="qr-card" title="Scannez pour accéder aux liens">
           <div class="qr-frame">
             <img
-              src="../logos/qr-code.png"
+              src="../logos/qr-code.png?v=3"
               alt="QR Code"
               class="qr-image"
               id="qr-image"
-              loading="eager"
-              onerror="this.onerror=null; this.src='../logos/qr-code.svg';">
-            <div class="qr-scan-line"></div>
-          </div>
-          <div class="qr-cta">
-            <span class="qr-label">SCANNEZ LE QR</span>
-            <span class="qr-sub">Offres & Événements</span>
+              loading="eager">
           </div>
         </a>
       </div>

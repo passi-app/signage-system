@@ -3,7 +3,7 @@
  * Enables autonomous digital signage playback without active internet.
  */
 
-const CACHE_VERSION = 'pubscreen-v3';
+const CACHE_VERSION = 'pubscreen-v5';
 const STATIC_CACHE_NAME = `static-${CACHE_VERSION}`;
 const MEDIA_CACHE_NAME = `media-${CACHE_VERSION}`;
 
@@ -12,12 +12,12 @@ const CORE_STATIC_ASSETS = [
   './',
   './index.html',
   './links.html',
-  './style.css?v=3',
+  './style.css?v=5',
   './app.js',
   './media-list.json',
   '../logos/passi-logo.png?v=2',
   '../logos/lagora-logo.png?v=2',
-  '../logos/qr-code.png'
+  '../logos/qr-code.png?v=3'
 ];
 
 // =========================================================================
@@ -78,6 +78,12 @@ self.addEventListener('fetch', (event) => {
 
   if (isVideoRequest) {
     event.respondWith(handleVideoRequest(request));
+    return;
+  }
+
+  // Network-first for HTML pages (ensures UI updates are immediate, fallback to cache when offline)
+  if (request.mode === 'navigate' || url.pathname.endsWith('.html') || url.pathname.endsWith('/')) {
+    event.respondWith(networkFirstStrategy(request, STATIC_CACHE_NAME));
     return;
   }
 

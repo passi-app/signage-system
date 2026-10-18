@@ -291,40 +291,39 @@ body.show-cursor {
   justify-content: center;
   align-items: center;
   position: relative;
-  /* Lift QR slightly above the bar edge for elegant visual hierarchy */
-  transform: translateY(-8px);
+  /* Float QR card prominently overlapping the top of the bar */
+  transform: translateY(-16px);
 }
 
 .qr-card {
   display: flex;
   align-items: center;
-  gap: 16px;
+  justify-content: center;
   background: #ffffff;
-  padding: 10px 18px 10px 10px;
-  border-radius: 20px;
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.16), 0 2px 6px rgba(0, 0, 0, 0.08);
-  border: 1px solid rgba(0, 0, 0, 0.06);
+  padding: 8px;
+  border-radius: 24px;
+  box-shadow: 0 16px 42px rgba(0, 0, 0, 0.28), 0 2px 8px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(0, 0, 0, 0.08);
   text-decoration: none;
   transition: transform 0.25s ease, box-shadow 0.25s ease;
   pointer-events: auto;
 }
 
 .qr-card:hover {
-  transform: scale(1.03);
-  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.2);
+  transform: scale(1.05);
+  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.35);
 }
 
 .qr-frame {
   position: relative;
-  width: 86px;
-  height: 86px;
+  width: 116px;
+  height: 116px;
   background: #ffffff;
-  border-radius: 12px;
+  border-radius: 18px;
   overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid rgba(0, 0, 0, 0.08);
   padding: 4px;
 }
 
@@ -332,43 +331,7 @@ body.show-cursor {
   width: 100%;
   height: 100%;
   object-fit: contain;
-}
-
-/* Animated scanner line effect over QR */
-.qr-scan-line {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 3px;
-  background: linear-gradient(90deg, transparent, #2563eb, transparent);
-  box-shadow: 0 0 8px #2563eb;
-  animation: scanQR 2.5s ease-in-out infinite alternate;
-  pointer-events: none;
-}
-
-@keyframes scanQR {
-  0% { top: 4px; }
-  100% { top: calc(100% - 7px); }
-}
-
-.qr-cta {
-  display: flex;
-  flex-direction: column;
-}
-
-.qr-label {
-  font-size: 14px;
-  font-weight: 800;
-  letter-spacing: 0.05em;
-  color: var(--color-dark);
-}
-
-.qr-sub {
-  font-size: 12px;
-  color: var(--color-gray-500);
-  font-weight: 600;
-  margin-top: 2px;
+  display: block;
 }
 
 /* Right Flank: Dynamic Sponsor Display Area */
@@ -503,12 +466,8 @@ body.show-cursor {
   }
 
   .qr-frame {
-    width: 68px;
-    height: 68px;
-  }
-
-  .qr-cta {
-    display: none;
+    width: 84px;
+    height: 84px;
   }
 
   .sponsor-display-box {
