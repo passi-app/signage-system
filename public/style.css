@@ -1,0 +1,523 @@
+/* ==========================================================================
+   PubScreen - Digital Signage System
+   Design System & Styling
+   ========================================================================== */
+
+:root {
+  --color-white: #ffffff;
+  --color-dark: #0f172a;
+  --color-gray-500: #64748b;
+  --color-gray-800: #1e293b;
+  --color-accent: #2563eb;
+  --color-accent-gold: #f59e0b;
+
+  /* Glassmorphic values */
+  --sponsor-bar-bg: rgba(255, 255, 255, 0.85);
+  --sponsor-bar-border: rgba(255, 255, 255, 0.7);
+  --glass-shadow: 0 -12px 36px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.06);
+
+  --logo-capsule-bg: rgba(255, 255, 255, 0.92);
+  --logo-capsule-border: rgba(255, 255, 255, 0.95);
+  --logo-shadow: 0 10px 25px rgba(0, 0, 0, 0.22), 0 2px 6px rgba(0, 0, 0, 0.12);
+
+  --font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --z-video: -1;
+  --z-header: 50;
+  --z-sponsor: 60;
+  --z-status: 100;
+}
+
+/* Reset & Box Sizing */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  font-family: var(--font-family);
+  background-color: #000000;
+  color: var(--color-dark);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  user-select: none;
+  -webkit-user-select: none;
+  cursor: none; /* Ideal for public unattended kiosks, can be toggled by mouse movement */
+}
+
+/* Re-enable cursor when moving mouse for debugging */
+body.show-cursor {
+  cursor: default;
+}
+
+/* ==========================================================================
+   1. BACKGROUND VIDEO LAYER
+   ========================================================================== */
+.video-container {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: var(--z-video);
+  overflow: hidden;
+  background-color: #000000;
+}
+
+.bg-video {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 1s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: opacity;
+}
+
+.bg-video.is-active {
+  opacity: 1;
+}
+
+/* Subtle cinematic edge vignette to ensure overlay text & logos pop */
+.video-vignette {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    circle at 50% 50%,
+    transparent 60%,
+    rgba(0, 0, 0, 0.25) 100%
+  );
+  z-index: 1;
+}
+
+/* Fallback glowing screen when no video is loaded */
+.video-fallback {
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  background: linear-gradient(135deg, #090d16 0%, #151a2e 50%, #0d111c 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.fallback-ambient-glow {
+  width: 60vw;
+  height: 60vw;
+  max-width: 600px;
+  max-height: 600px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(37, 99, 235, 0.25) 0%, transparent 70%);
+  filter: blur(80px);
+  animation: pulseAmbient 10s ease-in-out infinite alternate;
+}
+
+@keyframes pulseAmbient {
+  0% { transform: scale(0.9) translate(-5%, -5%); opacity: 0.6; }
+  100% { transform: scale(1.1) translate(5%, 5%); opacity: 0.9; }
+}
+
+/* ==========================================================================
+   2. PERMANENT LOGOS & HEADER
+   ========================================================================== */
+.permanent-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 32px 40px;
+  z-index: var(--z-header);
+  pointer-events: none;
+}
+
+.logo-wrapper {
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--logo-capsule-bg);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1.5px solid var(--logo-capsule-border);
+  border-radius: 20px;
+  box-shadow: var(--logo-shadow);
+  padding: 14px 22px;
+  transition: transform 0.3s ease;
+}
+
+.logo-wrapper:hover {
+  transform: translateY(-2px);
+}
+
+.permanent-logo {
+  height: 48px;
+  width: auto;
+  max-width: 170px;
+  object-fit: contain;
+  display: block;
+}
+
+/* Center Clock Widget */
+.header-center-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 24px;
+  padding: 8px 24px;
+  color: #ffffff;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+}
+
+.live-clock {
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.2;
+}
+
+.live-date {
+  font-size: 11px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.8);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+/* ==========================================================================
+   3. SPONSOR BAR (Bottom Screen)
+   ========================================================================== */
+.sponsor-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  height: 120px;
+  z-index: var(--z-sponsor);
+  background: var(--sponsor-bar-bg);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border-top: 1.5px solid var(--sponsor-bar-border);
+  box-shadow: var(--glass-shadow);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 48px;
+}
+
+.sponsor-bar-inner {
+  width: 100%;
+  max-width: 1800px;
+  height: 100%;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 32px;
+}
+
+/* Flanking Areas */
+.sponsor-flank {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  height: 100%;
+}
+
+.sponsor-flank-left {
+  align-items: flex-start;
+}
+
+.sponsor-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  background: rgba(15, 23, 42, 0.08);
+  border-radius: 30px;
+  margin-bottom: 6px;
+}
+
+.badge-dot {
+  width: 8px;
+  height: 8px;
+  background-color: #10b981;
+  border-radius: 50%;
+  box-shadow: 0 0 8px rgba(16, 185, 129, 0.6);
+  animation: pulseDot 2s infinite ease-in-out;
+}
+
+@keyframes pulseDot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.85); }
+}
+
+.badge-title {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-dark);
+}
+
+.sponsor-subtitle {
+  font-size: 13px;
+  color: var(--color-gray-500);
+  font-weight: 500;
+}
+
+/* Center QR Code Container */
+.qr-center-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  /* Lift QR slightly above the bar edge for elegant visual hierarchy */
+  transform: translateY(-8px);
+}
+
+.qr-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: #ffffff;
+  padding: 10px 18px 10px 10px;
+  border-radius: 20px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.16), 0 2px 6px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  text-decoration: none;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  pointer-events: auto;
+}
+
+.qr-card:hover {
+  transform: scale(1.03);
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.2);
+}
+
+.qr-frame {
+  position: relative;
+  width: 86px;
+  height: 86px;
+  background: #ffffff;
+  border-radius: 12px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  padding: 4px;
+}
+
+.qr-image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* Animated scanner line effect over QR */
+.qr-scan-line {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, #2563eb, transparent);
+  box-shadow: 0 0 8px #2563eb;
+  animation: scanQR 2.5s ease-in-out infinite alternate;
+  pointer-events: none;
+}
+
+@keyframes scanQR {
+  0% { top: 4px; }
+  100% { top: calc(100% - 7px); }
+}
+
+.qr-cta {
+  display: flex;
+  flex-direction: column;
+}
+
+.qr-label {
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  color: var(--color-dark);
+}
+
+.qr-sub {
+  font-size: 12px;
+  color: var(--color-gray-500);
+  font-weight: 600;
+  margin-top: 2px;
+}
+
+/* Right Flank: Dynamic Sponsor Display Area */
+.sponsor-flank-right {
+  align-items: flex-end;
+  position: relative;
+}
+
+.sponsor-display-box {
+  width: 240px;
+  height: 76px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  position: relative;
+  overflow: hidden;
+}
+
+.sponsor-logo-img {
+  max-width: 100%;
+  max-height: 64px;
+  object-fit: contain;
+  transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1), transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: opacity, transform;
+}
+
+.sponsor-logo-img.fade-in {
+  opacity: 1 !important;
+  transform: scale(1);
+}
+
+.sponsor-logo-img.fade-out {
+  opacity: 0 !important;
+  transform: scale(0.96);
+}
+
+.sponsor-empty-state {
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--color-gray-500);
+  text-transform: uppercase;
+}
+
+/* Micro progress indicator for sponsor rotation */
+.sponsor-progress-bar {
+  width: 240px;
+  height: 3px;
+  background: rgba(0, 0, 0, 0.06);
+  border-radius: 4px;
+  margin-top: 6px;
+  overflow: hidden;
+}
+
+.sponsor-progress-fill {
+  width: 0%;
+  height: 100%;
+  background: var(--color-accent);
+  border-radius: 4px;
+  transition: width 0.1s linear;
+}
+
+/* ==========================================================================
+   4. TOAST / STATUS NOTIFICATIONS
+   ========================================================================== */
+.network-status-toast {
+  position: fixed;
+  top: 36px;
+  left: 50%;
+  transform: translateX(-50%) translateY(-100px);
+  background: rgba(15, 23, 42, 0.9);
+  color: #ffffff;
+  padding: 8px 18px;
+  border-radius: 30px;
+  font-size: 13px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+  z-index: var(--z-status);
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.network-status-toast.visible {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+}
+
+.network-status-toast .status-indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: #10b981;
+}
+
+.network-status-toast.is-offline .status-indicator {
+  background-color: #ef4444;
+  box-shadow: 0 0 8px rgba(239, 68, 68, 0.8);
+}
+
+/* ==========================================================================
+   5. RESPONSIVE OPTIMIZATIONS (Kiosks, Vertical / Portrait Screens)
+   ========================================================================== */
+@media (max-width: 900px) {
+  .sponsor-bar {
+    height: 110px;
+    padding: 0 20px;
+  }
+
+  .sponsor-bar-inner {
+    gap: 16px;
+  }
+
+  .sponsor-subtitle {
+    display: none;
+  }
+
+  .qr-center-container {
+    transform: translateY(0);
+  }
+
+  .qr-frame {
+    width: 68px;
+    height: 68px;
+  }
+
+  .qr-cta {
+    display: none;
+  }
+
+  .sponsor-display-box {
+    width: 140px;
+    height: 56px;
+  }
+
+  .sponsor-progress-bar {
+    width: 140px;
+  }
+
+  .permanent-header {
+    padding: 20px 24px;
+  }
+
+  .permanent-logo {
+    height: 36px;
+  }
+
+  .header-center-info {
+    display: none;
+  }
+}

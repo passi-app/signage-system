@@ -1,0 +1,93 @@
+name: Update Media Index (Headless CMS)
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'videos/**'
+      - 'sponsors/**'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-index:
+    name: Scan & Generate media-list.json
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Scan media directories and compile index
+        run: |
+          node -e '
+            const fs = require("fs");
+            const path = require("path");
+
+            const VIDEO_EXTS = new Set([".mp4", ".webm", ".ogg", ".mov", ".m4v"]);
+            const SPONSOR_EXTS = new Set([".png", ".jpg", ".jpeg", ".svg", ".webp", ".gif"]);
+
+            function getValidFiles(dirPath, allowedExts) {
+              if (!fs.existsSync(dirPath)) {
+                return [];
+              }
+              return fs.readdirSync(dirPath)
+                .filter(file => {
+                  if (file.startsWith(".")) return false;
+                  if (file.toLowerCase() === "readme.md") return false;
+                  const ext = path.extname(file).toLowerCase();
+                  return allowedExts.has(ext);
+                })
+                .sort((a, b) => a.localeCompare(undefined, { numeric: true, sensitivity: "base" }));
+            }
+
+            const videos = getValidFiles(path.join(process.cwd(), "videos"), VIDEO_EXTS);
+            const sponsors = getValidFiles(path.join(process.cwd(), "sponsors"), SPONSOR_EXTS);
+
+            const payload = {
+              videos,
+              sponsors,
+              totalVideos: videos.length,
+              totalSponsors: sponsors.length,
+              updatedAt: new Date().toISOString()
+            };
+
+            const jsonStr = JSON.stringify(payload, null, 2) + "\n";
+
+            // Write to /public/ for direct web access
+            const publicDir = path.join(process.cwd(), "public");
+            if (!fs.existsSync(publicDir)) {
+              fs.mkdirSync(publicDir, { recursive: true });
+            }
+            fs.writeFileSync(path.join(publicDir, "media-list.json"), jsonStr, "utf8");
+
+            // Also maintain root media-list.json for convenience
+            fs.writeFileSync(path.join(process.cwd(), "media-list.json"), jsonStr, "utf8");
+
+            console.log("Generated media-list.json successfully:");
+            console.log(jsonStr);
+          '
+
+      - name: Commit and push media list
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add public/media-list.json media-list.json
+
+          if ! git diff --cached --quiet; then
+            git commit -m "chore(cms): auto-update media-list.json [skip ci]"
+            git push
+          else
+            echo "No changes detected in media-list.json. Nothing to commit."
+          fi

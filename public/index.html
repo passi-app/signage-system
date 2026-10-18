@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>PubScreen - Affichage Dynamique</title>
+  <meta name="description" content="Système d'affichage dynamique numérique autonome et résilient pour centre commercial.">
+  <meta name="theme-color" content="#ffffff">
+
+  <!-- Google Fonts: Plus Jakarta Sans for ultra-clean modern signage typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="signage-body">
+
+  <!-- ========================================================
+       1. BACKGROUND VIDEO LAYER (Full screen, dual crossfade)
+       ======================================================== -->
+  <div class="video-container" id="video-container" aria-hidden="true">
+    <video
+      id="bg-video-a"
+      class="bg-video is-active"
+      autoplay
+      muted
+      playsinline
+      preload="auto">
+    </video>
+    <video
+      id="bg-video-b"
+      class="bg-video"
+      autoplay
+      muted
+      playsinline
+      preload="auto">
+    </video>
+    <div class="video-vignette"></div>
+  </div>
+
+  <!-- Fallback visual if no video is loaded yet -->
+  <div class="video-fallback" id="video-fallback">
+    <div class="fallback-ambient-glow"></div>
+  </div>
+
+  <!-- ========================================================
+       2. PERMANENT LOGOS (Top Corners)
+       ======================================================== -->
+  <header class="permanent-header" role="banner">
+    <!-- Passi Logo: Top Left -->
+    <div class="logo-wrapper logo-left" id="logo-passi-container">
+      <img
+        src="../logos/passi-logo.png"
+        alt="Logo Passi"
+        class="permanent-logo"
+        id="logo-passi"
+        loading="eager"
+        onerror="this.onerror=null; this.src='../logos/passi-logo.svg';">
+    </div>
+
+    <!-- Live mall clock / status indicator -->
+    <div class="header-center-info" id="mall-clock-container">
+      <span class="live-clock" id="live-clock">--:--</span>
+      <span class="live-date" id="live-date">--</span>
+    </div>
+
+    <!-- L'agora Logo: Top Right -->
+    <div class="logo-wrapper logo-right" id="logo-lagora-container">
+      <img
+        src="../logos/lagora-logo.png"
+        alt="Logo L'agora"
+        class="permanent-logo"
+        id="logo-lagora"
+        loading="eager"
+        onerror="this.onerror=null; this.src='../logos/lagora-logo.svg';">
+    </div>
+  </header>
+
+  <!-- ========================================================
+       3. SPONSOR BAR (Fixed bottom bar, transparent white)
+       ======================================================== -->
+  <footer class="sponsor-bar" role="contentinfo" id="sponsor-bar">
+    <div class="sponsor-bar-inner">
+
+      <!-- Left Flank: Section / Info Badge -->
+      <div class="sponsor-flank sponsor-flank-left">
+        <div class="sponsor-badge">
+          <span class="badge-dot"></span>
+          <span class="badge-title">Partenaires Officiels</span>
+        </div>
+        <p class="sponsor-subtitle">Au cœur de votre expérience shopping</p>
+      </div>
+
+      <!-- Center: Prominent QR Code to links.html -->
+      <div class="qr-center-container">
+        <a href="links.html" class="qr-card" title="Scannez pour accéder aux liens exclusifs">
+          <div class="qr-frame">
+            <img
+              src="../logos/qr-code.png"
+              alt="QR Code"
+              class="qr-image"
+              id="qr-image"
+              loading="eager"
+              onerror="this.onerror=null; this.src='../logos/qr-code.svg';">
+            <div class="qr-scan-line"></div>
+          </div>
+          <div class="qr-cta">
+            <span class="qr-label">SCANNEZ LE QR</span>
+            <span class="qr-sub">Offres & Événements</span>
+          </div>
+        </a>
+      </div>
+
+      <!-- Right Flank: Dynamic Sponsor Display Area -->
+      <div class="sponsor-flank sponsor-flank-right" id="sponsor-display-area">
+        <div class="sponsor-display-box" id="sponsor-stage">
+          <img
+            id="sponsor-logo-img"
+            src=""
+            alt="Sponsor en vedette"
+            class="sponsor-logo-img"
+            style="opacity: 0;">
+          <div class="sponsor-empty-state" id="sponsor-empty-state" style="display: none;">
+            <span>L'AGORA MALL</span>
+          </div>
+        </div>
+        <div class="sponsor-progress-bar">
+          <div class="sponsor-progress-fill" id="sponsor-progress-fill"></div>
+        </div>
+      </div>
+
+    </div>
+  </footer>
+
+  <!-- ========================================================
+       4. OFFLINE & STATUS NOTIFICATIONS (Discreet)
+       ======================================================== -->
+  <div class="network-status-toast" id="network-status" aria-live="polite">
+    <span class="status-indicator"></span>
+    <span id="status-text">Mode en ligne</span>
+  </div>
+
+  <!-- Scripts -->
+  <script src="app.js"></script>
+</body>
+</html>
