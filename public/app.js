@@ -9,7 +9,10 @@
   // --- Configuration Constants ---
   const POLL_INTERVAL_MS = 5 * 60 * 1000;         // Poll media-list.json every 5 minutes
   const SPONSOR_CYCLE_MS = 10 * 1000;             // Cycle sponsor logos every 10 seconds
-  const MAX_VIDEO_DURATION_MS = 30 * 60 * 1000;   // Force-switch video after 30 minutes
+  // Configuration: 30 minutes repeated playback per video (configurable via ?slot_minutes=30)
+  const urlParams = new URLSearchParams(window.location.search);
+  const slotMinutesParam = parseFloat(urlParams.get('slot_minutes') || urlParams.get('duration_min') || '30');
+  const VIDEO_SLOT_DURATION_MS = (isNaN(slotMinutesParam) || slotMinutesParam <= 0 ? 30 : slotMinutesParam) * 60 * 1000;
   const VIDEO_BASE_PATH = '../videos/';
   const SPONSOR_BASE_PATH = '../sponsors/';
 
@@ -19,9 +22,13 @@
   let sponsorList = [];
   let currentSponsorIndex = 0;
   let maxDurationTimer = null;
+  let videoSlotStartTime = 0;
   let sponsorCycleInterval = null;
   let sponsorProgressAnimation = null;
   let isMediaListLoaded = false;
+
+  // Audio preference state: query flag (?sound=1 or ?audio=1) or user gesture toggle
+  let isAudioEnabled = urlParams.get('sound') === '1' || urlParams.get('audio') === '1';
 
   // Double-buffering video elements for zero-flicker crossfading
   const videoA = document.getElementById('bg-video-a');
@@ -42,18 +49,26 @@
   async function init() {
     console.log('[PubScreen] Booting digital signage player...');
 
-    // Prep video elements for silent kiosk autoplay
+    // Prep video elements for kiosk autoplay
     [videoA, videoB].forEach((vid) => {
       if (!vid) return;
-      vid.muted = true;
-      vid.defaultMuted = true;
+      vid.muted = !isAudioEnabled;
+      vid.defaultMuted = !isAudioEnabled;
       vid.playsInline = true;
-      vid.setAttribute('muted', '');
+      if (!isAudioEnabled) {
+        vid.setAttribute('muted', '');
+      } else {
+        vid.removeAttribute('muted');
+        vid.volume = 1.0;
+      }
       vid.setAttribute('playsinline', '');
     });
 
     // Start live clock
     initClock();
+
+    // Start audio controls
+    initAudioControls();
 
     // Setup network status listeners
     initNetworkMonitoring();
@@ -150,16 +165,19 @@
       return;
     }
 
-    // Clear existing 30-minute safety timeout
+    // Clear existing 30-minute slot timeout
     if (maxDurationTimer) {
       clearTimeout(maxDurationTimer);
       maxDurationTimer = null;
     }
 
+    // Start 30-minute timer for this video slot
+    videoSlotStartTime = Date.now();
+
     const videoFilename = playlist[index];
     const videoSrc = `${VIDEO_BASE_PATH}${encodeURIComponent(videoFilename)}`;
 
-    console.log(`[PubScreen] Playing video [${index + 1}/${playlist.length}]: ${videoFilename}`);
+    console.log(`[PubScreen] Playing video [${index + 1}/${playlist.length}]: ${videoFilename} (Repeats for 30 minutes)`);
 
     // Preload next candidate on inactive video element
     const nextVideoEl = inactiveVideoEl;
@@ -171,10 +189,16 @@
     nextVideoEl.oncanplay = null;
     nextVideoEl.onloadeddata = null;
 
-    // Guarantee muted state for browser autoplay policy
-    nextVideoEl.muted = true;
-    nextVideoEl.defaultMuted = true;
+    // Set audio state based on current preference
+    nextVideoEl.muted = !isAudioEnabled;
+    nextVideoEl.defaultMuted = !isAudioEnabled;
     nextVideoEl.playsInline = true;
+    if (isAudioEnabled) {
+      nextVideoEl.removeAttribute('muted');
+      nextVideoEl.volume = 1.0;
+    } else {
+      nextVideoEl.setAttribute('muted', '');
+    }
 
     let hasStarted = false;
 
@@ -190,6 +214,10 @@
         playPromise
           .then(() => {
             console.log(`[PubScreen] Video playback started: ${videoFilename}`);
+            const fallbackEl = document.getElementById('video-fallback');
+            if (fallbackEl) {
+              fallbackEl.classList.add('is-hidden');
+            }
             setTimeout(() => {
               if (currentVideoEl !== nextVideoEl) {
                 currentVideoEl.pause();
@@ -201,24 +229,49 @@
             activeVideoEl = nextVideoEl;
             inactiveVideoEl = currentVideoEl;
 
-            // Attach ended listener to advance to next
+            // Attach ended listener to repeat video until 30 minutes have elapsed
             activeVideoEl.onended = () => {
-              console.log('[PubScreen] Video finished naturally.');
-              advanceVideo();
+              const elapsed = Date.now() - videoSlotStartTime;
+              if (elapsed < VIDEO_SLOT_DURATION_MS) {
+                const elapsedMin = (elapsed / 60000).toFixed(1);
+                const totalMin = (VIDEO_SLOT_DURATION_MS / 60000).toFixed(0);
+                console.log(`[PubScreen] Video finished (${elapsedMin}m / ${totalMin}m elapsed in current slot). Repeating video.`);
+                activeVideoEl.currentTime = 0;
+                activeVideoEl.play().catch((replayErr) => {
+                  console.warn('[PubScreen] Replay interrupted, advancing to next video:', replayErr);
+                  advanceVideo();
+                });
+              } else {
+                console.log('[PubScreen] 30 minutes elapsed for this video slot. Advancing to next video.');
+                advanceVideo();
+              }
             };
 
-            // 30-minute maximum duration watchdog
+            // Watchdog: advance after 30-minute slot completes
+            const remainingSlotTime = Math.max(0, VIDEO_SLOT_DURATION_MS - (Date.now() - videoSlotStartTime));
             maxDurationTimer = setTimeout(() => {
-              console.warn('[PubScreen] 30 minutes elapsed on single video. Forcing advance.');
+              console.log('[PubScreen] 30-minute slot completed. Advancing to next video.');
               advanceVideo();
-            }, MAX_VIDEO_DURATION_MS);
+            }, remainingSlotTime);
           })
           .catch((playErr) => {
             console.warn('[PubScreen] Autoplay failed or requires interaction:', playErr);
+            // If play was rejected due to unmuted autoplay policy, fall back to muted and prompt for gesture
+            if (isAudioEnabled) {
+              console.log('[PubScreen] Falling back to muted autoplay until user gesture.');
+              setAudioState(false);
+              nextVideoEl.muted = true;
+              nextVideoEl.setAttribute('muted', '');
+              nextVideoEl.play().catch(console.warn);
+            }
+
             activeVideoEl = nextVideoEl;
             inactiveVideoEl = currentVideoEl;
 
             const resumeOnInteraction = () => {
+              if (!isAudioEnabled) {
+                setAudioState(true);
+              }
               nextVideoEl.play().catch(console.warn);
               window.removeEventListener('click', resumeOnInteraction);
               window.removeEventListener('touchstart', resumeOnInteraction);
@@ -255,12 +308,15 @@
     playVideoByIndex(currentVideoIndex);
   }
 
-  // Backup watchdog for timeupdate checking (e.g. video loops or stalled events)
+  // Safety watchdog if a video runs continuously without ended event
   [videoA, videoB].forEach((vid) => {
     vid.addEventListener('timeupdate', () => {
-      if (vid === activeVideoEl && vid.currentTime >= 1800) { // 1800 seconds = 30 minutes
-        console.warn('[PubScreen] Video reached 1800s. Advancing.');
-        advanceVideo();
+      if (vid === activeVideoEl) {
+        const elapsed = Date.now() - videoSlotStartTime;
+        if (elapsed >= VIDEO_SLOT_DURATION_MS + 5000) { // 30 minutes + 5s buffer
+          console.warn('[PubScreen] 30-minute slot duration exceeded in watchdog. Advancing.');
+          advanceVideo();
+        }
       }
     });
   });
@@ -372,6 +428,79 @@
     if (!navigator.onLine) {
       updateStatus(false);
     }
+  }
+
+  // =========================================================================
+  // 7. AUDIO CONTROLLER & UNMUTE SYSTEM
+  // =========================================================================
+  function updateAudioUI() {
+    const audioBtn = document.getElementById('audio-toggle');
+    const audioIcon = document.getElementById('audio-icon');
+    const audioLabel = document.getElementById('audio-label');
+    if (!audioBtn) return;
+
+    if (isAudioEnabled) {
+      audioBtn.classList.add('is-active');
+      if (audioIcon) audioIcon.textContent = '🔊';
+      if (audioLabel) audioLabel.textContent = 'Son activé';
+      audioBtn.title = 'Son activé (cliquer pour couper)';
+    } else {
+      audioBtn.classList.remove('is-active');
+      if (audioIcon) audioIcon.textContent = '🔇';
+      if (audioLabel) audioLabel.textContent = 'Son coupé';
+      audioBtn.title = 'Cliquer pour activer le son';
+    }
+  }
+
+  function setAudioState(enabled) {
+    isAudioEnabled = enabled;
+    [videoA, videoB].forEach((vid) => {
+      if (!vid) return;
+      vid.muted = !enabled;
+      if (enabled) {
+        vid.removeAttribute('muted');
+        vid.volume = 1.0;
+        // If active video is paused or suspended, resume it
+        if (vid.paused && vid.classList.contains('is-active')) {
+          vid.play().catch(console.warn);
+        }
+      } else {
+        vid.setAttribute('muted', '');
+      }
+    });
+    updateAudioUI();
+    console.log(`[PubScreen] Audio state set to: ${enabled ? 'UNMUTED (Sound ON)' : 'MUTED (Sound OFF)'}`);
+  }
+
+  function initAudioControls() {
+    updateAudioUI();
+
+    const audioBtn = document.getElementById('audio-toggle');
+    if (audioBtn) {
+      audioBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        setAudioState(!isAudioEnabled);
+      });
+    }
+
+    // Unmute on the first user interaction anywhere on the screen (unless clicking a link)
+    const onFirstUserGesture = (e) => {
+      if (e.target.closest('a') || e.target.closest('#audio-toggle')) return;
+      if (!isAudioEnabled) {
+        console.log('[PubScreen] User interaction detected. Unmuting player sound.');
+        setAudioState(true);
+      }
+    };
+
+    window.addEventListener('click', onFirstUserGesture);
+    window.addEventListener('touchstart', onFirstUserGesture);
+
+    // Keyboard shortcut: 'm' or 'M' to toggle mute
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'm' || e.key === 'M') {
+        setAudioState(!isAudioEnabled);
+      }
+    });
   }
 
   // Start app when DOM is parsed

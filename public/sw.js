@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'pubscreen-v18';
+const CACHE_VERSION = 'pubscreen-v20';
 const STATIC_CACHE_NAME = `static-${CACHE_VERSION}`;
 const MEDIA_CACHE_NAME = `media-${CACHE_VERSION}`;
 
@@ -7,12 +7,12 @@ const CORE_STATIC_ASSETS = [
   './',
   './index.html',
   './links.html',
-  './style.css?v=12',
-  './app.js?v=12',
+  './style.css?v=13',
+  './app.js?v=13',
   './media-list.json',
   '../logos/passi-logo.png?v=5',
   '../logos/lagora-logo.png?v=2',
-  '../logos/qr-code.png?v=3',
+  '../logos/qr-code.png?v=6',
   '../sponsors/sponsor1.png',
   '../sponsors/sponsor2.png'
 ];
@@ -61,18 +61,26 @@ self.addEventListener('fetch', (event) => {
   const request = event.request;
   const url = new URL(request.url);
 
-  // Ignore non-GET requests
+  // 1. Ignore non-http/https requests (prevents chrome-extension://, moz-extension:// unsupported cache errors)
+  if (!url.protocol.startsWith('http')) {
+    return;
+  }
+
+  // 2. Ignore non-GET requests
   if (request.method !== 'GET') {
     return;
   }
 
-  // Handle Range requests for Video Streaming (critical for .mp4 playback from cache)
+  // 3. For video requests: when online, do NOT intercept range requests so browser natively streams via HTTP 206
   const isVideoRequest = url.pathname.endsWith('.mp4') ||
                          url.pathname.endsWith('.webm') ||
-                         url.pathname.includes('/videos/') ||
-                         request.headers.get('range');
+                         url.pathname.includes('/videos/');
 
   if (isVideoRequest) {
+    if (navigator.onLine) {
+      // Let browser fetch video natively with full Range support
+      return;
+    }
     event.respondWith(handleVideoRequest(request));
     return;
   }
@@ -194,8 +202,12 @@ async function networkFirstStrategy(request, cacheName) {
   const cache = await caches.open(cacheName);
   try {
     const networkResponse = await fetch(request);
-    if (networkResponse && networkResponse.ok) {
-      cache.put(request, networkResponse.clone());
+    if (networkResponse && networkResponse.ok && request.url.startsWith('http')) {
+      try {
+        await cache.put(request, networkResponse.clone());
+      } catch (e) {
+        console.warn('[Service Worker] Cache put ignored:', e);
+      }
     }
     return networkResponse;
   } catch (error) {
@@ -215,11 +227,15 @@ async function staleWhileRevalidateOrCacheFirst(request) {
   const cachedResponse = await caches.match(request);
 
   const fetchPromise = fetch(request).then(async (networkResponse) => {
-    if (networkResponse && networkResponse.status === 200) {
-      const url = request.url;
-      const targetCacheName = url.includes('/sponsors/') ? MEDIA_CACHE_NAME : STATIC_CACHE_NAME;
-      const cache = await caches.open(targetCacheName);
-      cache.put(request, networkResponse.clone());
+    if (networkResponse && networkResponse.status === 200 && request.url.startsWith('http')) {
+      try {
+        const url = request.url;
+        const targetCacheName = url.includes('/sponsors/') ? MEDIA_CACHE_NAME : STATIC_CACHE_NAME;
+        const cache = await caches.open(targetCacheName);
+        await cache.put(request, networkResponse.clone());
+      } catch (cacheErr) {
+        console.warn('[Service Worker] Stale cache put skipped:', cacheErr);
+      }
     }
     return networkResponse;
   }).catch(() => {

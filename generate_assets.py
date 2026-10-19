@@ -114,79 +114,28 @@ def make_lagora_logo(path_png, path_svg):
         f.write(svg_content)
     print(f"Generated {path_svg}")
 
-def make_qr_code(path_png, path_svg):
-    # Generate clean, standard QR matrix pattern
-    size = 320
-    grid = 25
-    cell = size // grid
-    margin = (size - (grid * cell)) // 2
+def make_qr_code(path_png, path_svg, target_url='https://passi-app.github.io/signage-system/public/links.html'):
+    import qrcode
+    import qrcode.image.svg
 
-    img = Image.new('RGBA', (size, size), (255, 255, 255, 255))
-    draw = ImageDraw.Draw(img)
-
-    # Draw Finder Patterns at 3 corners
-    def draw_finder(ox, oy):
-        # 7x7 outer black
-        draw.rectangle([ox, oy, ox + 7*cell, oy + 7*cell], fill=(15, 23, 42, 255))
-        # 5x5 inner white
-        draw.rectangle([ox + cell, oy + cell, ox + 6*cell, oy + 6*cell], fill=(255, 255, 255, 255))
-        # 3x3 center black
-        draw.rectangle([ox + 2*cell, oy + 2*cell, ox + 5*cell, oy + 5*cell], fill=(15, 23, 42, 255))
-
-    draw_finder(margin, margin)
-    draw_finder(margin + (grid - 7)*cell, margin)
-    draw_finder(margin, margin + (grid - 7)*cell)
-
-    # Timing lines
-    for i in range(8, grid - 8):
-        if i % 2 == 0:
-            draw.rectangle([margin + i*cell, margin + 6*cell, margin + (i+1)*cell, margin + 7*cell], fill=(15, 23, 42, 255))
-            draw.rectangle([margin + 6*cell, margin + i*cell, margin + 7*cell, margin + (i+1)*cell], fill=(15, 23, 42, 255))
-
-    # Pseudo-random pseudo data cells for realistic QR code appearance
-    import random
-    random.seed(42)
-    for r in range(grid):
-        for c in range(grid):
-            # Skip finders
-            if (r < 8 and c < 8) or (r < 8 and c >= grid - 8) or (r >= grid - 8 and c < 8):
-                continue
-            if r == 6 or c == 6:
-                continue
-            if random.random() > 0.45:
-                x = margin + c * cell
-                y = margin + r * cell
-                draw.rectangle([x, y, x + cell - 1, y + cell - 1], fill=(15, 23, 42, 255))
-
-    # Central accent dot or small brand badge
-    center_box = [margin + 10*cell, margin + 10*cell, margin + 15*cell, margin + 15*cell]
-    draw.rectangle(center_box, fill=(255, 255, 255, 255))
-    draw.rectangle([center_box[0]+2, center_box[1]+2, center_box[2]-2, center_box[3]-2], fill=(37, 99, 235, 255))
-    draw.rectangle([center_box[0]+6, center_box[1]+6, center_box[2]-6, center_box[3]-6], fill=(255, 255, 255, 255))
-
+    # Generate genuine scannable PNG QR code
+    qr = qrcode.QRCode(
+        version=None,
+        error_correction=qrcode.constants.ERROR_CORRECT_H,
+        box_size=12,
+        border=2,
+    )
+    qr.add_data(target_url)
+    qr.make(fit=True)
+    img = qr.make_image(fill_color='#0f172a', back_color='#ffffff')
     img.save(path_png, 'PNG')
-    print(f"Generated {path_png}")
+    print(f"Generated genuine QR PNG {path_png} pointing to {target_url}")
 
-    # Also save svg
-    svg_data = f'''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {size} {size}" width="{size}" height="{size}">
-  <rect width="{size}" height="{size}" fill="#ffffff" rx="16"/>
-  <rect x="{margin}" y="{margin}" width="{7*cell}" height="{7*cell}" fill="#0f172a" />
-  <rect x="{margin+cell}" y="{margin+cell}" width="{5*cell}" height="{5*cell}" fill="#ffffff" />
-  <rect x="{margin+2*cell}" y="{margin+2*cell}" width="{3*cell}" height="{3*cell}" fill="#0f172a" />
-
-  <rect x="{margin+(grid-7)*cell}" y="{margin}" width="{7*cell}" height="{7*cell}" fill="#0f172a" />
-  <rect x="{margin+(grid-6)*cell}" y="{margin+cell}" width="{5*cell}" height="{5*cell}" fill="#ffffff" />
-  <rect x="{margin+(grid-5)*cell}" y="{margin+2*cell}" width="{3*cell}" height="{3*cell}" fill="#0f172a" />
-
-  <rect x="{margin}" y="{margin+(grid-7)*cell}" width="{7*cell}" height="{7*cell}" fill="#0f172a" />
-  <rect x="{margin+cell}" y="{margin+(grid-6)*cell}" width="{5*cell}" height="{5*cell}" fill="#ffffff" />
-  <rect x="{margin+2*cell}" y="{margin+(grid-5)*cell}" width="{3*cell}" height="{3*cell}" fill="#0f172a" />
-
-  <rect x="{center_box[0]}" y="{center_box[1]}" width="{5*cell}" height="{5*cell}" fill="#2563eb" rx="4" />
-</svg>'''
-    with open(path_svg, 'w', encoding='utf-8') as f:
-        f.write(svg_data)
-    print(f"Generated {path_svg}")
+    # Generate genuine scannable SVG QR code
+    factory = qrcode.image.svg.SvgPathImage
+    svg_img = qrcode.make(target_url, image_factory=factory, error_correction=qrcode.constants.ERROR_CORRECT_H)
+    svg_img.save(path_svg)
+    print(f"Generated genuine QR SVG {path_svg}")
 
 def make_sponsor_logo(path_png, brand_name, tag='PARTNER'):
     w, h = 320, 100

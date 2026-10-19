@@ -12,7 +12,9 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
-  <link rel="stylesheet" href="style.css?v=12">
+  <link rel="icon" type="image/x-icon" href="../favicon.ico">
+  <link rel="shortcut icon" href="../favicon.ico">
+  <link rel="stylesheet" href="style.css?v=13">
   <script>
     if (window.location.pathname.endsWith('/public')) {
       window.location.replace(window.location.pathname + '/' + window.location.search);
@@ -63,10 +65,14 @@
         loading="eager">
     </div>
 
-    <!-- Live mall clock / status indicator -->
+    <!-- Live mall clock / status indicator & audio toggle -->
     <div class="header-center-info" id="mall-clock-container">
       <span class="live-clock" id="live-clock">--:--</span>
       <span class="live-date" id="live-date">--</span>
+      <button class="audio-pill-btn" id="audio-toggle" type="button" aria-label="Contrôle audio" title="Cliquer pour activer/couper le son">
+        <span class="audio-pill-icon" id="audio-icon">🔇</span>
+        <span class="audio-pill-label" id="audio-label">Son coupé</span>
+      </button>
     </div>
 
     <!-- L'agora Logo: Top Right -->
@@ -91,18 +97,18 @@
       </div>
     </div>
 
-    <!-- Center: Prominent QR Code to links.html (Stationary & 100% scannable) -->
+    <!-- Center: Prominent Real QR Code (Static display for smartphone cameras, not a button) -->
     <div class="qr-center-container">
-      <a href="links.html" class="qr-card" title="Scannez pour accéder aux liens">
+      <div class="qr-card" role="img" aria-label="QR Code vers les liens officiels">
         <div class="qr-frame">
           <img
-            src="../logos/qr-code.png?v=3"
-            alt="QR Code"
+            src="../logos/qr-code.png?v=6"
+            alt="QR Code Passi"
             class="qr-image"
             id="qr-image"
             loading="eager">
         </div>
-      </a>
+      </div>
     </div>
   </footer>
 
@@ -115,6 +121,6 @@
   </div>
 
   <!-- Scripts -->
-  <script src="app.js?v=12"></script>
+  <script src="app.js?v=13"></script>
 </body>
 </html>

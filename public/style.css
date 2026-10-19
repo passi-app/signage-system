@@ -21,7 +21,7 @@
   --logo-shadow: 0 10px 25px rgba(0, 0, 0, 0.22), 0 2px 6px rgba(0, 0, 0, 0.12);
 
   --font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --z-video: -1;
+  --z-video: 1;
   --z-header: 50;
   --z-sponsor: 60;
   --z-status: 100;
@@ -100,11 +100,18 @@ body.show-cursor {
 .video-fallback {
   position: fixed;
   inset: 0;
-  z-index: -2;
+  z-index: 0;
   background: linear-gradient(135deg, #090d16 0%, #151a2e 50%, #0d111c 100%);
   display: flex;
   align-items: center;
   justify-content: center;
+  pointer-events: none;
+  transition: opacity 0.8s ease, visibility 0.8s ease;
+}
+
+.video-fallback.is-hidden {
+  opacity: 0;
+  visibility: hidden;
 }
 
 .fallback-ambient-glow {
@@ -173,20 +180,22 @@ body.show-cursor {
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
 }
 
-/* Center Clock Widget */
+/* Center Clock Widget & Audio Control */
 .header-center-info {
+  pointer-events: auto;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background: rgba(15, 23, 42, 0.6);
+  gap: 4px;
+  background: rgba(15, 23, 42, 0.65);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.18);
   border-radius: 24px;
-  padding: 8px 24px;
+  padding: 8px 20px;
   color: #ffffff;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
 }
 
 .live-clock {
@@ -194,7 +203,7 @@ body.show-cursor {
   font-weight: 800;
   letter-spacing: 0.05em;
   font-variant-numeric: tabular-nums;
-  line-height: 1.2;
+  line-height: 1.1;
 }
 
 .live-date {
@@ -203,6 +212,48 @@ body.show-cursor {
   color: rgba(255, 255, 255, 0.8);
   text-transform: uppercase;
   letter-spacing: 0.08em;
+}
+
+.audio-pill-btn {
+  margin-top: 4px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 999px;
+  color: #ffffff;
+  padding: 4px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  font-family: inherit;
+  outline: none;
+}
+
+.audio-pill-btn:hover {
+  background: rgba(255, 255, 255, 0.24);
+  transform: scale(1.05);
+}
+
+.audio-pill-btn:active {
+  transform: scale(0.97);
+}
+
+.audio-pill-btn.is-active {
+  background: rgba(37, 99, 235, 0.45);
+  border-color: rgba(96, 165, 250, 0.7);
+  box-shadow: 0 0 14px rgba(37, 99, 235, 0.6);
+}
+
+.audio-pill-btn:not(.is-active) {
+  animation: pulseSubtleAudio 3s ease-in-out infinite;
+}
+
+@keyframes pulseSubtleAudio {
+  0%, 100% { border-color: rgba(255, 255, 255, 0.25); }
+  50% { border-color: rgba(245, 158, 11, 0.7); box-shadow: 0 0 10px rgba(245, 158, 11, 0.35); }
 }
 
 /* ==========================================================================
@@ -306,14 +357,9 @@ body.show-cursor {
   border-radius: 18px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35), 0 0 0 2px rgba(255, 255, 255, 0.9);
   border: 1px solid rgba(0, 0, 0, 0.08);
-  text-decoration: none;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-  pointer-events: auto;
-}
-
-.qr-card:hover {
-  transform: scale(1.03);
-  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.42);
+  pointer-events: none;
+  cursor: default;
+  user-select: none;
 }
 
 .qr-frame {
