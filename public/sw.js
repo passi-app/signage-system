@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'pubscreen-v20';
+const CACHE_VERSION = 'pubscreen-v21';
 const STATIC_CACHE_NAME = `static-${CACHE_VERSION}`;
 const MEDIA_CACHE_NAME = `media-${CACHE_VERSION}`;
 
@@ -7,14 +7,15 @@ const CORE_STATIC_ASSETS = [
   './',
   './index.html',
   './links.html',
-  './style.css?v=13',
-  './app.js?v=13',
+  './favicon.ico',
+  './style.css?v=14',
+  './app.js?v=14',
   './media-list.json',
-  '../logos/passi-logo.png?v=5',
-  '../logos/lagora-logo.png?v=2',
-  '../logos/qr-code.png?v=6',
-  '../sponsors/sponsor1.png',
-  '../sponsors/sponsor2.png'
+  './logos/passi-logo.png?v=6',
+  './logos/lagora-logo.png?v=2',
+  './logos/qr-code.png?v=6',
+  './sponsors/sponsor1.png',
+  './sponsors/sponsor2.png'
 ];
 
 // =========================================================================

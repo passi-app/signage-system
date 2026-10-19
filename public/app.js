@@ -13,8 +13,8 @@
   const urlParams = new URLSearchParams(window.location.search);
   const slotMinutesParam = parseFloat(urlParams.get('slot_minutes') || urlParams.get('duration_min') || '30');
   const VIDEO_SLOT_DURATION_MS = (isNaN(slotMinutesParam) || slotMinutesParam <= 0 ? 30 : slotMinutesParam) * 60 * 1000;
-  const VIDEO_BASE_PATH = '../videos/';
-  const SPONSOR_BASE_PATH = '../sponsors/';
+  let VIDEO_BASE_PATH = 'videos/';
+  let SPONSOR_BASE_PATH = 'sponsors/';
 
   // --- State Variables ---
   let playlist = [];
@@ -295,9 +295,18 @@
       nextVideoEl.onloadeddata = startPlayback;
     }
 
-    // Error handling (e.g. 404, unsupported codec)
+    let hasTriedFallback = false;
+    // Error handling with alternative path fallback (e.g. videos/ vs ../videos/)
     nextVideoEl.onerror = function (e) {
       console.error(`[PubScreen] Error loading video "${videoFilename}":`, e);
+      if (!hasTriedFallback) {
+        hasTriedFallback = true;
+        VIDEO_BASE_PATH = VIDEO_BASE_PATH.startsWith('../') ? 'videos/' : '../videos/';
+        nextVideoEl.src = `${VIDEO_BASE_PATH}${encodeURIComponent(videoFilename)}`;
+        console.log(`[PubScreen] Retrying video with path: ${nextVideoEl.src}`);
+        nextVideoEl.load();
+        return;
+      }
       setTimeout(advanceVideo, 3000);
     };
   }
@@ -351,7 +360,8 @@
           src="${SPONSOR_BASE_PATH}${encodeURIComponent(filename)}?_v=real"
           alt="Sponsor ${filename}"
           class="sponsor-card-img"
-          loading="eager">
+          loading="eager"
+          onerror="if(!this.getAttribute('data-err')){this.setAttribute('data-err','1');this.src='../sponsors/${encodeURIComponent(filename)}?_v=real';}">
       </div>
     `).join('');
   }

@@ -12,9 +12,9 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
-  <link rel="icon" type="image/x-icon" href="../favicon.ico">
-  <link rel="shortcut icon" href="../favicon.ico">
-  <link rel="stylesheet" href="style.css?v=13">
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <link rel="shortcut icon" href="favicon.ico">
+  <link rel="stylesheet" href="style.css?v=14">
   <script>
     if (window.location.pathname.endsWith('/public')) {
       window.location.replace(window.location.pathname + '/' + window.location.search);
@@ -58,11 +58,12 @@
     <!-- Passi Logo: Top Left -->
     <div class="logo-wrapper logo-left" id="logo-passi-container">
       <img
-        src="../logos/passi-logo.png?v=5"
+        src="logos/passi-logo.png?v=6"
         alt="Logo Passi"
         class="permanent-logo"
         id="logo-passi"
-        loading="eager">
+        loading="eager"
+        onerror="if(!this.getAttribute('data-err')){this.setAttribute('data-err','1');this.src='../logos/passi-logo.png?v=6';}">
     </div>
 
     <!-- Live mall clock / status indicator & audio toggle -->
@@ -78,11 +79,12 @@
     <!-- L'agora Logo: Top Right -->
     <div class="logo-wrapper logo-right" id="logo-lagora-container">
       <img
-        src="../logos/lagora-logo.png?v=2"
+        src="logos/lagora-logo.png?v=2"
         alt="Logo L'agora"
         class="permanent-logo"
         id="logo-lagora"
-        loading="eager">
+        loading="eager"
+        onerror="if(!this.getAttribute('data-err')){this.setAttribute('data-err','1');this.src='../logos/lagora-logo.png?v=2';}">
     </div>
   </header>
 
@@ -102,11 +104,12 @@
       <div class="qr-card" role="img" aria-label="QR Code vers les liens officiels">
         <div class="qr-frame">
           <img
-            src="../logos/qr-code.png?v=6"
+            src="logos/qr-code.png?v=6"
             alt="QR Code Passi"
             class="qr-image"
             id="qr-image"
-            loading="eager">
+            loading="eager"
+            onerror="if(!this.getAttribute('data-err')){this.setAttribute('data-err','1');this.src='../logos/qr-code.png?v=6';}">
         </div>
       </div>
     </div>
@@ -121,6 +124,6 @@
   </div>
 
   <!-- Scripts -->
-  <script src="app.js?v=13"></script>
+  <script src="app.js?v=14"></script>
 </body>
 </html>
