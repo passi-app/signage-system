@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'pubscreen-v22';
+const CACHE_VERSION = 'pubscreen-v23';
 const STATIC_CACHE_NAME = `static-${CACHE_VERSION}`;
 const MEDIA_CACHE_NAME = `media-${CACHE_VERSION}`;
 
