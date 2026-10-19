@@ -2,13 +2,24 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "outputDirectory": "public",
   "cleanUrls": true,
+  "rewrites": [
+    { "source": "/our-pages", "destination": "/our-pages.html" },
+    { "source": "/our-pages/", "destination": "/our-pages.html" },
+    { "source": "/ourpages", "destination": "/our-pages.html" },
+    { "source": "/our%20pages", "destination": "/our-pages.html" },
+    { "source": "/links", "destination": "/links.html" }
+  ],
   "headers": [
     {
       "source": "/(.*)",
       "headers": [
         { "key": "Access-Control-Allow-Origin", "value": "*" },
         { "key": "Access-Control-Allow-Methods", "value": "GET, OPTIONS" },
-        { "key": "Accept-Ranges", "value": "bytes" }
+        { "key": "Accept-Ranges", "value": "bytes" },
+        { "key": "X-Content-Type-Options", "value": "nosniff" },
+        { "key": "X-Frame-Options", "value": "SAMEORIGIN" },
+        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
+        { "key": "Strict-Transport-Security", "value": "max-age=63072000; includeSubDomains; preload" }
       ]
     },
     {

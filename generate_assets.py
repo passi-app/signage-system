@@ -114,26 +114,26 @@ def make_lagora_logo(path_png, path_svg):
         f.write(svg_content)
     print(f"Generated {path_svg}")
 
-def make_qr_code(path_png, path_svg, target_url='https://passi-app.github.io/signage-system/public/links.html'):
+def make_qr_code(path_png, path_svg, target_url='https://signage-system-inky.vercel.app/our-pages'):
     import qrcode
     import qrcode.image.svg
 
-    # Generate genuine scannable PNG QR code
+    # Generate genuine scannable PNG QR code (Standard Medium 15% error correction for screen scanning)
     qr = qrcode.QRCode(
         version=None,
-        error_correction=qrcode.constants.ERROR_CORRECT_H,
-        box_size=12,
-        border=2,
+        error_correction=qrcode.constants.ERROR_CORRECT_M,
+        box_size=10,
+        border=4,
     )
     qr.add_data(target_url)
     qr.make(fit=True)
-    img = qr.make_image(fill_color='#0f172a', back_color='#ffffff')
+    img = qr.make_image(fill_color='#000000', back_color='#ffffff')
     img.save(path_png, 'PNG')
     print(f"Generated genuine QR PNG {path_png} pointing to {target_url}")
 
     # Generate genuine scannable SVG QR code
     factory = qrcode.image.svg.SvgPathImage
-    svg_img = qrcode.make(target_url, image_factory=factory, error_correction=qrcode.constants.ERROR_CORRECT_H)
+    svg_img = qrcode.make(target_url, image_factory=factory, error_correction=qrcode.constants.ERROR_CORRECT_M)
     svg_img.save(path_svg)
     print(f"Generated genuine QR SVG {path_svg}")
 
@@ -161,11 +161,23 @@ def make_sponsor_logo(path_png, brand_name, tag='PARTNER'):
     print(f"Generated {path_png}")
 
 if __name__ == '__main__':
-    make_passi_logo('logos/passi-logo.png', 'logos/passi-logo.svg')
-    make_lagora_logo('logos/lagora-logo.png', 'logos/lagora-logo.svg')
-    make_qr_code('logos/qr-code.png', 'logos/qr-code.svg')
+    import shutil
+    target_qr_url = 'https://signage-system-inky.vercel.app/our-pages'
+    os.makedirs('logos', exist_ok=True)
+    os.makedirs('public/logos', exist_ok=True)
+    os.makedirs('sponsors', exist_ok=True)
+    os.makedirs('public/sponsors', exist_ok=True)
 
-    # Generate 4 high-end sponsor logos
+    if not os.path.exists('logos/passi-logo.png'):
+        make_passi_logo('logos/passi-logo.png', 'logos/passi-logo.svg')
+    if not os.path.exists('logos/lagora-logo.png'):
+        make_lagora_logo('logos/lagora-logo.png', 'logos/lagora-logo.svg')
+    make_qr_code('logos/qr-code.png', 'logos/qr-code.svg', target_url=target_qr_url)
+
+    shutil.copy('logos/qr-code.png', 'public/logos/qr-code.png')
+    shutil.copy('logos/qr-code.svg', 'public/logos/qr-code.svg')
+
+    # Generate sponsor logos
     make_sponsor_logo('sponsors/sponsor_zara.png', 'ZARA', 'MODE & ACCESSOIRES')
     make_sponsor_logo('sponsors/sponsor_apple.png', 'APPLE STORE', 'PREMIUM RESELLER')
     make_sponsor_logo('sponsors/sponsor_sephora.png', 'SEPHORA', 'BEAUTÉ & PARFUM')
