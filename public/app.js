@@ -9,10 +9,38 @@
   // --- Configuration Constants ---
   const POLL_INTERVAL_MS = 5 * 60 * 1000;         // Poll media-list.json every 5 minutes
   const SPONSOR_CYCLE_MS = 10 * 1000;             // Cycle sponsor logos every 10 seconds
-  // Configuration: 30 minutes repeated playback per video (configurable via ?slot_minutes=30)
+  // Configuration: 30 minutes repeated playback per video (configurable via ?duration=30, ?slot_minutes=30 or in media-list.json)
   const urlParams = new URLSearchParams(window.location.search);
-  const slotMinutesParam = parseFloat(urlParams.get('slot_minutes') || urlParams.get('duration_min') || '30');
-  const VIDEO_SLOT_DURATION_MS = (isNaN(slotMinutesParam) || slotMinutesParam <= 0 ? 30 : slotMinutesParam) * 60 * 1000;
+
+  function parseDurationMinutes(val, fallback = 30) {
+    if (val === undefined || val === null || val === '') return fallback;
+    const str = String(val).trim().toLowerCase();
+    if (str.endsWith('ms')) {
+      const ms = parseFloat(str);
+      return !isNaN(ms) && ms > 0 ? ms / 60000 : fallback;
+    }
+    if (str.endsWith('s') || str.endsWith('sec')) {
+      const s = parseFloat(str);
+      return !isNaN(s) && s > 0 ? s / 60 : fallback;
+    }
+    if (str.endsWith('h') || str.endsWith('hr') || str.endsWith('hour') || str.endsWith('heures')) {
+      const h = parseFloat(str);
+      return !isNaN(h) && h > 0 ? h * 60 : fallback;
+    }
+    const num = parseFloat(str);
+    return !isNaN(num) && num > 0 ? num : fallback;
+  }
+
+  const rawUrlDuration = urlParams.get('duration') ||
+                         urlParams.get('slot_minutes') ||
+                         urlParams.get('duration_min') ||
+                         urlParams.get('duration_minutes') ||
+                         urlParams.get('video_duration') ||
+                         urlParams.get('slot');
+
+  const hasUrlDurationOverride = rawUrlDuration !== null && rawUrlDuration !== undefined;
+  let videoSlotMinutes = parseDurationMinutes(rawUrlDuration, 30);
+  let VIDEO_SLOT_DURATION_MS = videoSlotMinutes * 60 * 1000;
   let VIDEO_BASE_PATH = 'videos/';
   let SPONSOR_BASE_PATH = 'sponsors/';
 
@@ -130,6 +158,22 @@
   }
 
   function handleMediaListUpdate(data) {
+    if (!hasUrlDurationOverride && data) {
+      const configDuration = data.videoDurationMinutes !== undefined ? data.videoDurationMinutes :
+                             data.videoSlotMinutes !== undefined ? data.videoSlotMinutes :
+                             data.slot_minutes !== undefined ? data.slot_minutes :
+                             data.duration_min !== undefined ? data.duration_min :
+                             data.duration;
+      if (configDuration !== undefined && configDuration !== null) {
+        const parsed = parseDurationMinutes(configDuration, 30);
+        if (parsed !== videoSlotMinutes) {
+          videoSlotMinutes = parsed;
+          VIDEO_SLOT_DURATION_MS = videoSlotMinutes * 60 * 1000;
+          console.log(`[PubScreen] Video duration updated from media-list.json: ${videoSlotMinutes} minutes`);
+        }
+      }
+    }
+
     const newVideos = Array.isArray(data.videos) ? data.videos : [];
     const newSponsors = Array.isArray(data.sponsors) ? data.sponsors : [];
 
@@ -165,19 +209,19 @@
       return;
     }
 
-    // Clear existing 30-minute slot timeout
+    // Clear existing duration slot timeout
     if (maxDurationTimer) {
       clearTimeout(maxDurationTimer);
       maxDurationTimer = null;
     }
 
-    // Start 30-minute timer for this video slot
+    // Start timer for this video slot
     videoSlotStartTime = Date.now();
 
     const videoFilename = playlist[index];
     const videoSrc = `${VIDEO_BASE_PATH}${encodeURIComponent(videoFilename)}`;
 
-    console.log(`[PubScreen] Playing video [${index + 1}/${playlist.length}]: ${videoFilename} (Repeats for 30 minutes)`);
+    console.log(`[PubScreen] Playing video [${index + 1}/${playlist.length}]: ${videoFilename} (Repeats for ${videoSlotMinutes} minutes)`);
 
     // Preload next candidate on inactive video element
     const nextVideoEl = inactiveVideoEl;
@@ -229,7 +273,7 @@
             activeVideoEl = nextVideoEl;
             inactiveVideoEl = currentVideoEl;
 
-            // Attach ended listener to repeat video until 30 minutes have elapsed
+            // Attach ended listener to repeat video until slot duration (30 min default) has elapsed
             activeVideoEl.onended = () => {
               const elapsed = Date.now() - videoSlotStartTime;
               if (elapsed < VIDEO_SLOT_DURATION_MS) {
@@ -242,15 +286,15 @@
                   advanceVideo();
                 });
               } else {
-                console.log('[PubScreen] 30 minutes elapsed for this video slot. Advancing to next video.');
+                console.log(`[PubScreen] ${videoSlotMinutes} minutes elapsed for this video slot. Advancing to next video.`);
                 advanceVideo();
               }
             };
 
-            // Watchdog: advance after 30-minute slot completes
+            // Watchdog: advance after slot duration completes
             const remainingSlotTime = Math.max(0, VIDEO_SLOT_DURATION_MS - (Date.now() - videoSlotStartTime));
             maxDurationTimer = setTimeout(() => {
-              console.log('[PubScreen] 30-minute slot completed. Advancing to next video.');
+              console.log(`[PubScreen] ${videoSlotMinutes}-minute slot completed. Advancing to next video.`);
               advanceVideo();
             }, remainingSlotTime);
           })
@@ -322,8 +366,8 @@
     vid.addEventListener('timeupdate', () => {
       if (vid === activeVideoEl) {
         const elapsed = Date.now() - videoSlotStartTime;
-        if (elapsed >= VIDEO_SLOT_DURATION_MS + 5000) { // 30 minutes + 5s buffer
-          console.warn('[PubScreen] 30-minute slot duration exceeded in watchdog. Advancing.');
+        if (elapsed >= VIDEO_SLOT_DURATION_MS + 5000) { // slot duration + 5s buffer
+          console.warn(`[PubScreen] ${videoSlotMinutes}-minute slot duration exceeded in watchdog. Advancing.`);
           advanceVideo();
         }
       }

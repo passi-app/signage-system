@@ -55,9 +55,20 @@ jobs:
             const videos = getValidFiles(path.join(process.cwd(), "videos"), VIDEO_EXTS);
             const sponsors = getValidFiles(path.join(process.cwd(), "sponsors"), SPONSOR_EXTS);
 
+            let videoDurationMinutes = 30;
+            try {
+              if (fs.existsSync(path.join(process.cwd(), "media-list.json"))) {
+                const prev = JSON.parse(fs.readFileSync(path.join(process.cwd(), "media-list.json"), "utf8"));
+                if (typeof prev.videoDurationMinutes === "number" && prev.videoDurationMinutes > 0) {
+                  videoDurationMinutes = prev.videoDurationMinutes;
+                }
+              }
+            } catch (e) {}
+
             const payload = {
               videos,
               sponsors,
+              videoDurationMinutes,
               totalVideos: videos.length,
               totalSponsors: sponsors.length,
               updatedAt: new Date().toISOString()

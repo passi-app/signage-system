@@ -94,7 +94,8 @@
 - **Full-Screen Video Player:**
   - Double-buffered `<video>` architecture (`#bg-video-a` and `#bg-video-b`) with opacity crossfading to eliminate black flashes between videos.
   - Automatically loops back to the start when the end of the playlist is reached.
-  - **30-Minute Safety Watchdog:** If any video exceeds 30 minutes, it automatically transitions to the next item to prevent frozen or looped content from dominating the screen.
+  - **30-Minute Video Slot Duration:** Chaque vidéo est jouée en boucle pendant un créneau de **30 minutes** (paramètre par défaut de 30 min, configurable via `?duration=30` dans l'URL ou `"videoDurationMinutes": 30` dans `media-list.json`).
+  - **30-Minute Safety Watchdog:** Si une vidéo dépasse la durée du créneau (30 min), le système bascule automatiquement à la vidéo suivante de la playlist.
 - **Permanent Top Corner Branding:**
   - Top-Left: **Passi** logo in a frosted glass capsule with contrast drop shadow.
   - Top-Right: **L'agora** logo.
@@ -129,7 +130,9 @@ python -m http.server 8080
 ```
 
 Open your browser to:
-- **Digital Signage Display:** `http://localhost:8080/public/index.html`
+- **Digital Signage Display (30 min loop par vidéo):** `http://localhost:8080/public/index.html`
+- **Avec paramètre personnalisé de durée (ex: 30 minutes):** `http://localhost:8080/public/index.html?duration=30`
+- **Avec son activé et 30 min de créneau:** `http://localhost:8080/public/index.html?duration=30&sound=1`
 - **QR Mobile Landing Page:** `http://localhost:8080/public/links.html`
 
 To simulate an internet loss, open Chrome DevTools > **Network** tab > select **Offline**. The screen will display the discreet *"Mode Hors-ligne (Actif)"* indicator and continue playing video and cycling sponsors seamlessly from cache.
