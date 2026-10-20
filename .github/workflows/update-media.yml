@@ -30,78 +30,7 @@ jobs:
           node-version: 20
 
       - name: Scan media directories and compile index
-        run: |
-          node -e '
-            const fs = require("fs");
-            const path = require("path");
-
-            const VIDEO_EXTS = new Set([".mp4", ".webm", ".ogg", ".mov", ".m4v"]);
-            const SPONSOR_EXTS = new Set([".png", ".jpg", ".jpeg", ".svg", ".webp", ".gif"]);
-
-            function getValidFiles(dirPath, allowedExts) {
-              if (!fs.existsSync(dirPath)) {
-                return [];
-              }
-              return fs.readdirSync(dirPath)
-                .filter(file => {
-                  if (file.startsWith(".")) return false;
-                  if (file.toLowerCase() === "readme.md") return false;
-                  const ext = path.extname(file).toLowerCase();
-                  return allowedExts.has(ext);
-                })
-                .sort((a, b) => a.localeCompare(undefined, { numeric: true, sensitivity: "base" }));
-            }
-
-            const videos = getValidFiles(path.join(process.cwd(), "videos"), VIDEO_EXTS);
-            const sponsors = getValidFiles(path.join(process.cwd(), "sponsors"), SPONSOR_EXTS);
-
-            let videoDurationMinutes = 30;
-            try {
-              if (fs.existsSync(path.join(process.cwd(), "media-list.json"))) {
-                const prev = JSON.parse(fs.readFileSync(path.join(process.cwd(), "media-list.json"), "utf8"));
-                if (typeof prev.videoDurationMinutes === "number" && prev.videoDurationMinutes > 0) {
-                  videoDurationMinutes = prev.videoDurationMinutes;
-                }
-              }
-            } catch (e) {}
-
-            const payload = {
-              videos,
-              sponsors,
-              videoDurationMinutes,
-              totalVideos: videos.length,
-              totalSponsors: sponsors.length,
-              updatedAt: new Date().toISOString()
-            };
-
-            const jsonStr = JSON.stringify(payload, null, 2) + "\n";
-
-            // Write to /public/ for direct web access
-            const publicDir = path.join(process.cwd(), "public");
-            if (!fs.existsSync(publicDir)) {
-              fs.mkdirSync(publicDir, { recursive: true });
-            }
-            fs.writeFileSync(path.join(publicDir, "media-list.json"), jsonStr, "utf8");
-
-            // Also maintain root media-list.json for convenience
-            fs.writeFileSync(path.join(process.cwd(), "media-list.json"), jsonStr, "utf8");
-
-            // Sync media and logos into public directory for Vercel/Pages deployments
-            function syncDir(src, dest) {
-              if (!fs.existsSync(src)) return;
-              if (!fs.existsSync(dest)) fs.mkdirSync(dest, { recursive: true });
-              for (const file of fs.readdirSync(src)) {
-                if (file.startsWith('.')) continue;
-                fs.copyFileSync(path.join(src, file), path.join(dest, file));
-              }
-            }
-            syncDir(path.join(process.cwd(), "videos"), path.join(publicDir, "videos"));
-            syncDir(path.join(process.cwd(), "sponsors"), path.join(publicDir, "sponsors"));
-            syncDir(path.join(process.cwd(), "logos"), path.join(publicDir, "logos"));
-
-            console.log("Generated media-list.json and synced public assets successfully:");
-            console.log(jsonStr);
-          '
+        run: node scripts/update-media.js
 
       - name: Commit and push media list & public assets
         run: |
@@ -110,7 +39,7 @@ jobs:
           git add public/ media-list.json
 
           if ! git diff --cached --quiet; then
-            git commit -m "chore(cms): auto-update media-list.json and sync public assets [skip ci]"
+            git commit -m "chore(cms): auto-update media-list.json and sync public assets"
             git push
           else
             echo "No changes detected. Nothing to commit."

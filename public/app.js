@@ -151,7 +151,7 @@
     } else if (!isMediaListLoaded) {
       console.warn('[PubScreen] media-list.json unavailable, loading default fallback demo items.');
       handleMediaListUpdate({
-        videos: ['vid1.mp4', 'vid2.mp4'],
+        videos: ['1020(1).mp4'],
         sponsors: ['sponsor2.png', 'sponsor1.png']
       });
     }

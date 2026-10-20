@@ -1,14 +1,13 @@
 {
   "videos": [
-    "vid1.mp4",
-    "vid2.mp4"
+    "1020(1).mp4"
   ],
   "sponsors": [
     "sponsor2.png",
     "sponsor1.png"
   ],
   "videoDurationMinutes": 30,
-  "totalVideos": 2,
+  "totalVideos": 1,
   "totalSponsors": 2,
-  "updatedAt": "2026-10-18T19:49:35.892Z"
+  "updatedAt": "2026-10-20T03:33:13.607Z"
 }
